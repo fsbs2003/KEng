@@ -77,10 +77,13 @@ if __name__ == "__main__":
         match(remainingCandidates, question, answer)
         nextQuestion = specify(question, answer)
 
-    print("These are the suggested models:")
+    if (len(remainingCandidates) > 0):
+        print("These are the suggested models:")
 
-    for selected_candidate in remainingCandidates:
-        print(selected_candidate.get_name())
+        for selected_candidate in remainingCandidates:
+            print(selected_candidate.get_name())
+    else:
+        print("There is no model that satisfies the inserted criteria.")
 
 
 
