@@ -1,3 +1,8 @@
+#
+# Represents Candidate's base class, which associates a candidate
+#   with the given attributes.
+#
+
 class ModelBaseClass(object):
     ModelID = "The Model's ID"
     ModelName = "The Name of the Model"

@@ -10,7 +10,6 @@ from Candidates.ModelBaseClass import ModelBaseClass
 #     └── (b) DistributesUnregularDividends with answers: {'a': 'Yes', 'b': 'No'}
 
 
-
 # Stock Candidate Attributes
 FreeCashFlowToEquityModels = ModelBaseClass(ModelID="FreeCashFlowToEquityModels",
                                             ModelName="Free Cash Flow To Equity Model Types",
@@ -37,8 +36,8 @@ GordonGrowthModel = ModelBaseClass(ModelID="GordonGrowthModel",
                                    ModelName="Gordon Growth Model",
                                    Attributes={"ProductType": "Stocks",
                                                "DemandsDiscountRate": "Yes",
-                                               "CashFlowDataAvailable": "Yes",
-                                               "DemandsDividendPayoutToGrow": "No",
+                                               "CashFlowDataAvailable": "No",
+                                               "DemandsDividendPayoutToGrow": "Yes",
                                                "DemandsDividendPayoutToGrowAtConstantRate": "Yes"})
 
 ThreeStageDividendDiscountModel = ModelBaseClass(ModelID="ThreeStageDividendDiscountModel",
@@ -66,10 +65,11 @@ DiscountedResidualIncomeModel = ModelBaseClass(ModelID="DiscountedResidualIncome
                                                            "DistributesUnregularDividends": "Yes"})
 
 DiscountedAssetModel = ModelBaseClass(ModelID="DiscountedAssetModel",
-                                               ModelName="Discounted Asset Model",
-                                               Attributes={"ProductType": "Stocks",
-                                                           "DemandsDiscountRate": "No",
-                                                           "DistributesUnregularDividends": "No"})
+                                      ModelName="Discounted Asset Model",
+                                      Attributes={"ProductType": "Stocks",
+                                                  "DemandsDiscountRate": "No",
+                                                  "DistributesUnregularDividends": "No"})
+
 
 def getStockCandidatesFeatures():
     return {FreeCashFlowToEquityModels,

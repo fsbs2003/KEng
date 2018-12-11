@@ -1,142 +1,16 @@
-from anytree import NodeMixin, AnyNode, RenderTree
-from Candidates.ModelBaseClass import ModelBaseClass
 from Candidates import StockModels, OptionsModels
+from KnowledgeBase import KnowledgeAttributeNode, getFirstAttribute, printTreeFromCurrentLocation
 
 
-#
-# This is a definition of a knowledge Attribute.  It contains the
-#       Relevant output to be given during the obtain step and the
-#       Valid answers for this question.
-#
-class KnowledgeAttributeBase(object):
-    attributeName = "AttributeID"
-    question = "Question to be asked on the Obtain Step"
-    answers = {"key": "answer value"}
-    requiredAnswer = "Answer at Parent node that is necessary to reach this node"
-
-
-class KnowledgeAttributeNode(KnowledgeAttributeBase, NodeMixin):
-    def __init__(self, attributeName, question, answers, requiredAnswer="Root", isLeaf=False, parent=None):
-        super(KnowledgeAttributeBase, self).__init__()
-        self.attributeName = attributeName
-        self.question = question
-        self.answers = answers
-        self.requiredAnswer = requiredAnswer
-        self.parent = parent
-        self.isLeaf = isLeaf
-
-
-ProductType = KnowledgeAttributeNode(
-    attributeName="ProductType",
-    question="What type of product do you want to model?",
-    answers={"a": "Stocks", "b": "Options"})
-
-HistoricalUnderlyingAssetPriceAvailable = KnowledgeAttributeNode(
-    parent=ProductType,
-    requiredAnswer="b",
-    attributeName="HistoricalUnderlyingAssetPriceAvailable",
-    question="Are the historical Underlying Asset Prices available?",
-    answers={"a": "Yes", "b": "No"})
-
-Risk_FreeRateInfoAvailable = KnowledgeAttributeNode(
-    parent=HistoricalUnderlyingAssetPriceAvailable,
-    requiredAnswer="a",
-    attributeName="Risk_FreeRateInfoAvailable",
-    question="Is the risk free rate available?",
-    answers={"a": "Yes", "b": "No"})
-
-UnderlyingAsset = KnowledgeAttributeNode(
-    parent=Risk_FreeRateInfoAvailable,
-    requiredAnswer="a",
-    attributeName="UnderlyingAsset",
-    question="What is the underlying asset?",
-    answers={"a": "Stocks", "b": "Bonds or Swaps"})
-
-AdditionalUncertantiesStocks = KnowledgeAttributeNode(
-    parent=UnderlyingAsset,
-    requiredAnswer="a",
-    attributeName="AdditionalUncertanties",
-    question="Are there additional uncertanties?",
-    answers={"a": "Yes", "b": "No"})
-
-AdditionalUncertantiesBondsOrSwaps = KnowledgeAttributeNode(
-    parent=UnderlyingAsset,
-    requiredAnswer="b",
-    attributeName="AdditionalUncertanties",
-    question="Are there additional uncertanties?",
-    answers={"a": "Yes", "b": "No"})
-
-OptionTypeStock = KnowledgeAttributeNode(
-    parent=AdditionalUncertantiesStocks,
-    requiredAnswer="b",
-    attributeName="OptionType",
-    question="What is the option type ?",
-    answers={"a": "European", "b": "American"})
-
-OptionTypeBondsOrSwaps = KnowledgeAttributeNode(
-    parent=AdditionalUncertantiesBondsOrSwaps,
-    requiredAnswer="b",
-    attributeName="OptionType",
-    question="What is the option type ?",
-    answers={"a": "European", "b": "American"})
-
-AssumeDividendsAreNotPaid = KnowledgeAttributeNode(
-    parent=OptionTypeStock,
-    requiredAnswer="a",
-    attributeName="AssumeDividendsAreNotPaid",
-    question="Is it assumed that Dividends are not paid ?",
-    answers={"a": "Yes", "b": "No"})
-
-
-
-DemandsDiscountRate = KnowledgeAttributeNode(
-    attributeName="DemandsDiscountRate",
-    parent=ProductType,
-    requiredAnswer="a",
-    question="Do you have a discount rate calculated?",
-    answers={"a": "Yes", "b": "No"})
-
-CashFlowDataAvailable = KnowledgeAttributeNode(
-    attributeName="CashFlowDataAvailable", parent=DemandsDiscountRate,
-    requiredAnswer="a",
-    question="Is there cash flow data available?",
-    answers={"a": "Yes", "b": "No"})
-
-DistributesUnregularDividends = KnowledgeAttributeNode(
-    attributeName="DistributesUnregularDividends", parent=DemandsDiscountRate,
-    requiredAnswer="b",
-    question="Does the company Pay Out Dividends Unregularly?",
-    answers={"a": "Yes", "b": "No"})
-
-FirmHasStableLeverage = KnowledgeAttributeNode(
-    attributeName="FirmHasStableLeverage",
-    parent=CashFlowDataAvailable,
-    requiredAnswer="a",
-    question="Does the company have a stable/ moderate amount of leverage?",
-    answers={"a": "Yes", "b": "No"}
-)
-
-DemandsDividendPayoutToGrow = KnowledgeAttributeNode(
-    attributeName="DemandsDividendPayoutToGrow",
-    parent=CashFlowDataAvailable,
-    requiredAnswer="b",
-    question="Is the company expected to grow at some period "
-             "in the future?",
-    answers={"a": "Yes", "b": "No"})
-
-DemandsDividendPayoutToGrowAtConstantRate = KnowledgeAttributeNode(
-    attributeName="DemandsDividendPayoutToGrowAtConstantRate",
-    parent=DemandsDividendPayoutToGrow,
-    requiredAnswer="a",
-    question="Is it safe to assume that the company's growth will remain constant?",
-    answers={"a": "Yes", "b": "No"})
-
-DemandsMoreThanTwoGrowthStages = KnowledgeAttributeNode(
-    attributeName="DemandsMoreThanTwoGrowthStages",
-    parent=DemandsDividendPayoutToGrowAtConstantRate,
-    requiredAnswer="b",
-    question="Are there more than 2 stages of growth for the dividend payout in this company?",
-    answers={"a": "Yes", "b": "No"})
+# ***********************INFERENCE ENGINE***************************** #
+#                                                                      #
+# This InferenceEngine.py represents the Inference engine which        #
+# will Base its inferences on the knowledge base which is defined      #
+# in  KnowledgeBase.py.   The specific inference steps are defined as  #
+# Functions which will be called according to the Inference            #
+# Model Defined in the project materials. The Logic is defined below   #
+# the function definitions.                                            #
+# ******************************************************************** #
 
 
 def specify(current_node: KnowledgeAttributeNode, given_answer):
@@ -180,9 +54,6 @@ def obtain(Attribute: KnowledgeAttributeNode):
         for answer in Attribute.answers:
             print("%s-%s" % (answer, Attribute.answers[answer]))
         collected_answer = input("Please enter a Valid input:")
-
-    # Return the User's Given Answer
-    feature = {Attribute.attributeName: Attribute.answers[collected_answer]}
 
     return collected_answer
 
@@ -230,36 +101,45 @@ def match(current_feature, candidate_set):
     return new_candidate_set
 
 
-# DEBUG: Print the Knowledge Base Tree
-# for pre, _, node in RenderTree(ProductType):
-#     if node.isLeaf is True:
-#         print("%s(%s) [Leaf] %s with answers: %s " % (pre, node.requiredAnswer, node.attributeName, node.answers))
-#     else:
-#         print("%s(%s) %s with answers: %s" % (pre, node.requiredAnswer, node.attributeName, node.answers))
-#
-# print("You are currently in ProductType: {Stock, Options}")
+# ***************************** LOGIC ************************** #
+#                                                                #
+# The logic is based on the pruning based classification task    #
+# type where initially, all candidates are considered, and the   #
+# Range of possible candidates becomes smaller as more features  #
+# are obtained.  The attributes of the candidates are compared   #
+# with the attribute set collected from the user, and candidates #
+# are pruned as the process goes further.  The candidates and    #
+# Their attributes are defined in the Candicates Package.        #
+# ************************************************************** #
 
-# Defining the first attribute
-current_attribute = ProductType
-# Obtain the value for the Attribute
+# Defining the first relevant attribute to be considered
+current_attribute = getFirstAttribute()
+# Obtain the value for the attribute  in order to define a new feature
 value_obtainted = obtain(current_attribute)
-# Generate Step
+# GENERATE: generate the set of candidates based on the initial feature acquired
 candidates = generate(current_attribute, value_obtainted)
 feature_set = set()
 
+# DEBUG: Print the Knowledge Base Tree in its entirety
+# printTreeFromCurrentLocation(current_attribute)
+
 while current_attribute is not None:
-    # SPECIFY the current attribute based on the knowledge Base
+    # SPECIFY: Specify the next attribute to be considered based on the knowledge Base Tree
     current_attribute = specify(current_attribute, value_obtainted)
 
     if current_attribute is not None:
-        # OBTAIN the value of the attribute in order to form a feature
+        # OBTAIN: Obtain the value of the attribute in order to form a feature
         value_obtainted = obtain(current_attribute)
         current_feature = {current_attribute.attributeName: current_attribute.answers[value_obtainted]}
         feature_set = feature_set.union(current_feature)
-        # MATCH the candidates to those that contain the current feature
+        # MATCH: Match the candidates to those that contain the current feature
         candidates = match(current_feature, candidates)
 
+        # DEBUG: Print Candidates as you go
+        print("Your Model set is:")
+        for candidate in candidates:
+            print("* %s" % candidate.ModelName)
 
 print("Your Model set is:")
 for candidate in candidates:
-    print(candidate.ModelName)
+    print("* %s" % candidate.ModelName)
