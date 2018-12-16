@@ -1,5 +1,5 @@
 from Candidates import StockModels, OptionsModels
-from KnowledgeBase import KnowledgeAttributeNode, getFirstAttribute, printTreeFromCurrentLocation
+from KnowledgeBase import KnowledgeBaseTreeNode, getFirstAttribute, printTreeFromCurrentLocation
 
 
 # ***********************INFERENCE ENGINE***************************** #
@@ -13,7 +13,7 @@ from KnowledgeBase import KnowledgeAttributeNode, getFirstAttribute, printTreeFr
 # ******************************************************************** #
 
 
-def specify(current_node: KnowledgeAttributeNode, given_answer):
+def specify(current_node: KnowledgeBaseTreeNode, given_answer):
     """Specify Step
 
     :param current_node: the current concept in the knowledge base
@@ -29,6 +29,8 @@ def specify(current_node: KnowledgeAttributeNode, given_answer):
     #     previous obtain step
     if children_tuple.__len__() > 0:
         for var in children_tuple:
+            # In order to select the correct child, make sure that it corresponds with
+            #    the User's previous answer
             if var.requiredAnswer == given_answer:
                 return var
 
@@ -38,7 +40,7 @@ def specify(current_node: KnowledgeAttributeNode, given_answer):
         return None
 
 
-def obtain(Attribute: KnowledgeAttributeNode):
+def obtain(Attribute: KnowledgeBaseTreeNode):
     """Obtain Step
 
     Obtains the value for the attribute given in the Specify Step
@@ -50,7 +52,9 @@ def obtain(Attribute: KnowledgeAttributeNode):
 
     # Print the Question and collect an answer until a valid answer is given
     while collected_answer not in Attribute.answers:
+        # 1) Print the question
         print(Attribute.question)
+        # 2) Print the set of possible answers
         for answer in Attribute.answers:
             print("%s-%s" % (answer, Attribute.answers[answer]))
         collected_answer = input("Please enter a Valid input:")
@@ -58,7 +62,7 @@ def obtain(Attribute: KnowledgeAttributeNode):
     return collected_answer
 
 
-def generate(current_attribute: KnowledgeAttributeNode, feature):
+def generate(current_attribute: KnowledgeBaseTreeNode, feature):
     """Generate Step
 
     Generates the set of possible candidates based on the initial feature given
@@ -114,32 +118,45 @@ def match(current_feature, candidate_set):
 
 # Defining the first relevant attribute to be considered
 current_attribute = getFirstAttribute()
-# Obtain the value for the attribute  in order to define a new feature
+
+# DEBUG: Print the Knowledge Base Tree in its entirety
+printTreeFromCurrentLocation(current_attribute)
+
+# OBTAIN CRITERIA: Obtain the value for the attribute  in order to define a new feature
 value_obtainted = obtain(current_attribute)
 # GENERATE: generate the set of candidates based on the initial feature acquired
 candidates = generate(current_attribute, value_obtainted)
 feature_set = set()
 
-# DEBUG: Print the Knowledge Base Tree in its entirety
-# printTreeFromCurrentLocation(current_attribute)
-
 while current_attribute is not None:
+    # DEBUG: Print Candidates as you go
+    print("*******************************************************************\n")
+    print("\nGiven your previous answers, your potential candidates are:")
+    if len(candidates) > 0:
+        for candidate in candidates:
+            print("* %s" % candidate.ModelName)
+
+    else:
+        print("*No Candidates fit the Criteria*")
+    print("-------------------------------------------------------------------\n")
+
     # SPECIFY: Specify the next attribute to be considered based on the knowledge Base Tree
     current_attribute = specify(current_attribute, value_obtainted)
 
     if current_attribute is not None:
-        # OBTAIN: Obtain the value of the attribute in order to form a feature
+        # DEBUG: Print the Knowledge Base Tree from the current node
+        printTreeFromCurrentLocation(current_attribute)
+        # OBTAIN: Obtain the value of the selected attribute in order to form a feature
         value_obtainted = obtain(current_attribute)
         current_feature = {current_attribute.attributeName: current_attribute.answers[value_obtainted]}
         feature_set = feature_set.union(current_feature)
         # MATCH: Match the candidates to those that contain the current feature
         candidates = match(current_feature, candidates)
 
-        # DEBUG: Print Candidates as you go
-        print("Your Model set is:")
-        for candidate in candidates:
-            print("* %s" % candidate.ModelName)
-
 print("Your Model set is:")
-for candidate in candidates:
-    print("* %s" % candidate.ModelName)
+if len(candidates) > 0:
+    for candidate in candidates:
+        print("* %s" % candidate.ModelName)
+
+else:
+    print("*No candidates fulfill the criteria*")

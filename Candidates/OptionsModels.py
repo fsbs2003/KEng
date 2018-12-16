@@ -1,4 +1,4 @@
-from Candidates.ModelBaseClass import ModelBaseClass
+from Candidates.Model import Model
 
 # (Root) ProductType with answers: {'a': 'Stocks', 'b': 'Options'}
 # ├── (b) HistoricalUnderlyingAssetPriceAvailable with answers: {'a': 'Yes', 'b': 'No'}
@@ -11,7 +11,7 @@ from Candidates.ModelBaseClass import ModelBaseClass
 # │               └── (b) OptionType with answers: {'a': 'European', 'b': 'American'}
 
 
-MonteCarlo = ModelBaseClass(
+MonteCarlo = Model(
     ModelID="MonteCarlo",
     ModelName="Monte Carlo Simulations",
     Attributes={"ProductType": "Options",
@@ -19,7 +19,7 @@ MonteCarlo = ModelBaseClass(
                 "Risk_FreeRateInfoAvailable": "Yes",
                 "FirmHasStableLeverage": "Yes"})
 
-Lattice = ModelBaseClass(
+Lattice = Model(
     ModelID="Lattice",
     ModelName="Lattice models",
     Attributes={"ProductType": "Options",
@@ -29,7 +29,7 @@ Lattice = ModelBaseClass(
                 "AdditionalUncertanties": "No",
                 "OptionType": "American"})
 
-B_n_SClassical = ModelBaseClass(
+B_n_SClassical = Model(
     ModelID="B_n_SClassical",
     ModelName="Black and Scholes Classical Models",
     Attributes={"ProductType": "Options",
@@ -40,7 +40,7 @@ B_n_SClassical = ModelBaseClass(
                 "AdditionalUncertanties": "No",
                 "AssumeDividendsAreNotPaid": "Yes"})
 
-B_n_SDivYield = ModelBaseClass(
+B_n_SDivYield = Model(
     ModelID="B_n_SDivYield",
     ModelName="Black and Scholes Dividend Yield Models",
     Attributes={"ProductType": "Options",
